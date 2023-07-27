@@ -1,0 +1,54 @@
+<html>
+  <style>
+    h1 {
+      text-align: center;
+    }
+    table,
+    tr,
+    th,
+    td {
+      border: 1px solid #ccc;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+  </style>
+  <script
+    src="https://unpkg.com/htmx.org@1.9.4"
+    integrity="sha384-zUfuhFKKZCbHTY6aRR46gxiqszMk5tcHjsVFxnUo8VMus4kHGVdIYVbOYYNlKmHV"
+    crossorigin="anonymous"
+  ></script>
+  <h1>{{ .title }}</h1>
+
+  <div>
+    <form
+      id="create_form"
+      hx-post="/create_todo"
+      hx-target="table>tbody"
+      hx-swap="beforeend"
+    >
+      <textarea name="content" cols="30" rows="10"></textarea>
+      <button>创建TODO</button>
+      <button type="reset">清空输入内容</button>
+    </form>
+  </div>
+  <div
+    hx-get="/get_todos"
+    hx-trigger="load"
+    hx-target="table>tbody"
+    hx-swap="innerHTML"
+  ></div>
+
+  <h2 id="content"></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>内容</th>
+        <th>创建时间</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</html>

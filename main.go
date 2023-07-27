@@ -33,6 +33,96 @@ func main() {
 
 	r := gin.Default()
 
+	r.LoadHTMLGlob("templates/*")
+	r.GET("/index", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", gin.H{
+			"title": "Gin TODO List",
+		})
+	})
+
+	r.POST("/create_todo", func(c *gin.Context) {
+		content := c.PostForm("content")
+
+		todo := Todo{Content: content}
+
+		result := db.Create(&todo)
+
+		if result.Error != nil {
+			log.Fatal("创建todo失败：", result.Error)
+		}
+
+		str := fmt.Sprintf(`
+    <tr>
+      <td>%v</td>
+      <td>%v</td>
+      <td>%v</td>
+      <td>
+      <button type="button" hx-delete="/todo/%v" hx-target="table>tbody"
+    hx-swap="innerHTML">删除</button>
+<button type="button">编辑</button>
+      </td>
+    </tr>
+  `, todo.ID, todo.Content, todo.CreatedAt.Format("2006-01-02 15:04:05"), todo.ID)
+
+		c.String(http.StatusOK, str)
+	})
+
+	// 根据id删除TODO
+	r.DELETE("/todo/:id", func(c *gin.Context) {
+		id, _ := strconv.Atoi(c.Param("id"))
+
+		todo := Todo{}
+		_ = db.First(&todo, id)
+
+		_ = db.Delete(&todo, id)
+
+		str := ""
+		todos := []Todo{}
+
+		db.Find(&todos)
+
+		for _, todo := range todos {
+			str += fmt.Sprintf(`
+      <tr>
+        <td>%v</td>
+        <td>%v</td>
+        <td>%v</td>
+        <td>
+        <button type="button" hx-delete="/todo/%v" hx-target="table>tbody"
+    hx-swap="innerHTML">删除</button>
+<button type="button">编辑</button>
+        </td>
+      </tr>
+    `, todo.ID, todo.Content, todo.CreatedAt.Format("2006-01-02 15:04:05"), todo.ID)
+		}
+
+		c.String(http.StatusOK, str)
+	})
+
+	r.GET("/get_todos", func(c *gin.Context) {
+		str := ""
+		todos := []Todo{}
+
+		db.Find(&todos)
+
+		for _, todo := range todos {
+			str += fmt.Sprintf(`
+      <tr>
+        <td>%v</td>
+        <td>%v</td>
+        <td>%v</td>
+        <td>
+        <button type="button" hx-delete="/todo/%v" hx-target="table>tbody"
+    hx-swap="innerHTML">删除</button>
+<button type="button">编辑</button>
+        </td>
+      </tr>
+    `, todo.ID, todo.Content, todo.CreatedAt.Format("2006-01-02 15:04:05"), todo.ID)
+		}
+
+		c.String(http.StatusOK, str)
+	})
+
 	// 获取所有TODO
 	r.GET("/todos", GetTodos)
 
