@@ -7,23 +7,6 @@
 	},
 	"item": [
 		{
-			"name": "ping",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{host}}/ping",
-					"host": [
-						"{{host}}"
-					],
-					"path": [
-						"ping"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "获取所有TODO",
 			"request": {
 				"method": "GET",
@@ -46,18 +29,18 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{host}}/todo/:id",
+					"raw": "{{host}}/todos/:id",
 					"host": [
 						"{{host}}"
 					],
 					"path": [
-						"todo",
+						"todos",
 						":id"
 					],
 					"variable": [
 						{
 							"key": "id",
-							"value": null
+							"value": "2"
 						}
 					]
 				}
@@ -71,7 +54,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"id\": 2,\r\n    \"content\": \"2222\",\r\n    \"done\": false\r\n}",
+					"raw": "{\r\n    \"content\": \"2222\",\r\n    \"done\": false\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -79,12 +62,12 @@
 					}
 				},
 				"url": {
-					"raw": "{{host}}/todo",
+					"raw": "{{host}}/todos",
 					"host": [
 						"{{host}}"
 					],
 					"path": [
-						"todo"
+						"todos"
 					]
 				}
 			},
@@ -96,12 +79,12 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "{{host}}/todo/:id",
+					"raw": "{{host}}/todos/:id",
 					"host": [
 						"{{host}}"
 					],
 					"path": [
-						"todo",
+						"todos",
 						":id"
 					],
 					"variable": [
@@ -121,7 +104,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"content\": \"我是被更新后的值\",\r\n    \"done\": true\r\n}",
+					"raw": "{\r\n    \"Content\": \"我更新了hahahahahha\",\r\n    \"Done\": {\r\n        \"Bool\": false,\r\n        \"Valid\": true\r\n    }\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -129,12 +112,12 @@
 					}
 				},
 				"url": {
-					"raw": "{{host}}/todo/:id",
+					"raw": "{{host}}/todos/:id",
 					"host": [
 						"{{host}}"
 					],
 					"path": [
-						"todo",
+						"todos",
 						":id"
 					],
 					"variable": [
@@ -171,7 +154,7 @@
 	"variable": [
 		{
 			"key": "host",
-			"value": "localhost:8080",
+			"value": "localhost:9000",
 			"type": "string"
 		}
 	]
