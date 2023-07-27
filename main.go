@@ -1,63 +1,72 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
+	"log"
+	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
-type CreateTodoReq struct {
-	Id      int    `json:"id"`
-	Content string `json:"content"`
-	Done    bool   `json:"done"`
-}
-
-type UpdateTodoReq struct {
-	Content string `json:"content"`
-	Done    bool   `json:"done"`
-}
-
 type Todo struct {
-	CreateTodoReq
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	gorm.Model
+	Done    sql.NullBool `gorm:"default:false"`
+	Content string
 }
 
-var todos = []Todo{}
+var db *gorm.DB
+var err error
 
 func main() {
+
+	db, err = gorm.Open(sqlite.Open("data.db"), &gorm.Config{})
+	if err != nil {
+		log.Fatal("连接数据库失败", err)
+	}
+
+	// 迁移 schema，相当于让GORM帮你创建表
+	db.AutoMigrate(&Todo{})
+
 	r := gin.Default()
 
-	r.GET("/ping", Ping)
-
 	// 获取所有TODO
-	r.GET("/todo", GetTodo)
+	r.GET("/todos", GetTodos)
 
 	// 根据id获取TODO
-	r.GET("/todo/:id", GetTodoById)
+	r.GET("/todos/:id", GetTodoById)
 
 	// 新增TODO
-	r.POST("/todo", CreateTodo)
+	r.POST("/todos", CreateTodo)
 
 	// 根据id删除TODO
-	r.DELETE("/todo/:id", DeleteTodoById)
+	r.DELETE("/todos/:id", DeleteTodoById)
 
 	// 根据id更新TODO
-	r.PUT("/todo/:id", UpdateTodoById)
+	r.PUT("/todos/:id", UpdateTodoById)
 
-	r.Run() // 监听并在 0.0.0.0:8080 上启动服务
+	r.Run("localhost:9000")
 }
 
 func Ping(c *gin.Context) {
-	c.JSON(200, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"message": "air installed",
 	})
 }
 
-func GetTodo(c *gin.Context) {
-	c.JSON(200, gin.H{
+func GetTodos(c *gin.Context) {
+	todos := []Todo{}
+
+	result := db.Find(&todos)
+
+	if result.Error != nil {
+		log.Fatal("查询数据库失败", result.Error)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
 		"data": todos,
 	})
 }
@@ -66,55 +75,51 @@ func GetTodoById(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
-		c.JSON(400, gin.H{
+		c.JSON(http.StatusBadRequest, gin.H{
 			"msg": "非法的id",
 		})
 
 		return
 	}
 
-	todoIndex := -1
+	todo := Todo{}
+	result := db.First(&todo, id)
 
-	for i, v := range todos {
-		if v.Id == id {
-			todoIndex = i
-			break
-		}
-	}
-
-	if todoIndex == -1 {
-		c.JSON(400, gin.H{
-			"msg": fmt.Sprintf("未找到id为%v的todo", id),
+	if result.Error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"data": nil,
+			"msg":  fmt.Sprintf("未找到id为%v的todo", id),
 		})
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"data": todos[todoIndex],
+	c.JSON(http.StatusOK, gin.H{
+		"data": todo,
 	})
 }
 
 func CreateTodo(c *gin.Context) {
-	req := CreateTodoReq{}
+	todo := Todo{}
 
-	err := c.ShouldBindJSON(&req)
+	err := c.ShouldBindJSON(&todo)
 
 	if err != nil {
-		c.JSON(500, gin.H{
+		c.JSON(http.StatusInternalServerError, gin.H{
 			"data": nil,
-			"msg":  "解析请求出错",
+			"msg":  fmt.Sprintf("解析请求出错: %v", err.Error()),
 		})
 	}
 
-	todo := Todo{
-		CreateTodoReq: req,
-		CreatedAt:     time.Now(),
-		UpdatedAt:     time.Now(),
+	result := db.Create(&todo)
+
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"data": nil,
+			"msg":  fmt.Sprintf("创建todo失败: %v", err.Error()),
+		})
 	}
 
-	todos = append(todos, todo)
-
-	c.JSON(200, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"data": todo,
 	})
 }
@@ -123,36 +128,35 @@ func DeleteTodoById(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
-		c.JSON(400, gin.H{
+		c.JSON(http.StatusBadRequest, gin.H{
 			"msg": "非法的id",
 		})
 
 		return
 	}
 
-	deleteIndex := -1
+	todo := Todo{}
+	result := db.First(&todo, id)
 
-	for i, v := range todos {
-		if v.Id == id {
-			deleteIndex = i
-			break
-		}
-	}
-
-	if deleteIndex == -1 {
-		c.JSON(400, gin.H{
-			"msg": fmt.Sprintf("未找到id为%v的todo", id),
+	if result.Error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"data": nil,
+			"msg":  fmt.Sprintf("未找到id为%v的todo", id),
 		})
 		return
 	}
-	// [a, b, c, d]  =>  如果要删除c这个元素，那么先找到c所在的索引，2
-	// [:2] => 拿到 [a, b]; [(2+1);] => [3:]拿到[d]，然后 [d]展开，append到[1,2]这个切片
-	// 最后把得到的值重新赋值给todos就删除了
-	deletedTodo := todos[deleteIndex]
-	todos = append(todos[:deleteIndex], todos[deleteIndex+1:]...)
 
-	c.JSON(200, gin.H{
-		"data": deletedTodo,
+	result = db.Delete(&todo, id)
+
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"data": nil,
+			"msg":  "删除todo失败",
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": todo,
 	})
 }
 
@@ -160,46 +164,48 @@ func UpdateTodoById(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
-		c.JSON(400, gin.H{
+		c.JSON(http.StatusBadRequest, gin.H{
 			"msg": "非法的id",
 		})
 
 		return
 	}
 
-	updateIndex := -1
+	todo := Todo{}
+	result := db.First(&todo, id)
 
-	for i, v := range todos {
-		if v.Id == id {
-			updateIndex = i
-			break
-		}
-	}
-
-	if updateIndex == -1 {
-		c.JSON(400, gin.H{
-			"msg": fmt.Sprintf("未找到id为%v的todo", id),
+	if result.Error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"data": nil,
+			"msg":  fmt.Sprintf("未找到id为%v的todo", id),
 		})
 		return
 	}
 
-	updateReq := UpdateTodoReq{}
-
-	err = c.ShouldBindJSON(&updateReq)
+	updateTodo := Todo{}
+	err = c.ShouldBindJSON(&updateTodo)
 
 	if err != nil {
-		c.JSON(500, gin.H{
+		c.JSON(http.StatusInternalServerError, gin.H{
 			"data": nil,
-			"msg":  "解析请求出错",
+			"msg":  fmt.Sprintf("解析请求出错: %v", err.Error()),
+		})
+		return
+	}
+
+	todo.Content = updateTodo.Content
+	todo.Done = updateTodo.Done
+
+	result = db.Save(&todo)
+
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"data": nil,
+			"msg":  "更新todo失败",
 		})
 	}
 
-	// 更新对应索引上的todo
-	todos[updateIndex].Content = updateReq.Content
-	todos[updateIndex].Done = updateReq.Done
-	todos[updateIndex].UpdatedAt = time.Now()
-
-	c.JSON(200, gin.H{
-		"data": todos[updateIndex],
+	c.JSON(http.StatusOK, gin.H{
+		"data": todo,
 	})
 }
