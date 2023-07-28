@@ -8,11 +8,7 @@
 go install github.com/cosmtrek/air@latest
 ```
 
-2. 安装好后，直接在根目录执行`air`就能启动服务
-
-```shell
-air
-```
+2. 安装好后，使用`air init`初始化`air`的配置文件，然后执行`air`就能启动服务
 
 ## 测试
 

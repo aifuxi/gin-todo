@@ -2,3 +2,6 @@ tmp
 
 # db
 *.db
+
+# air config
+.air.toml
