@@ -1,0 +1,21 @@
+{{ range .todos }}
+<tr id="td_{{ .ID }}">
+  <td><input type="checkbox" /></td>
+  <td>{{ .Content }}</td>
+  <td>7/30/2023, 12:19:42 AM</td>
+  <td>
+    <div class="buttons">
+      <button class="button is-outlined">编辑</button>
+      <button
+        class="button is-danger is-outlined"
+        hx-delete="/delete_todo/{{ .ID }}"
+        hx-trigger="click"
+        hx-swap="outerHTML"
+        hx-target="#td_{{ .ID }}"
+      >
+        删除
+      </button>
+    </div>
+  </td>
+</tr>
+{{end}}
