@@ -10,6 +10,7 @@ type Todo struct {
 	Content string
 }
 
+// 获取所有TODO
 func GetTodos() ([]Todo, error) {
 	todos := []Todo{}
 
@@ -22,6 +23,7 @@ func GetTodos() ([]Todo, error) {
 	return todos, nil
 }
 
+// 根据id获取TODO
 func GetTodoById(id int) (Todo, error) {
 	todo := Todo{}
 	result := db.First(&todo, id)
@@ -34,6 +36,7 @@ func GetTodoById(id int) (Todo, error) {
 	return todo, nil
 }
 
+// 创建TODO
 func CreateTodo(todo *Todo) error {
 
 	result := db.Create(&todo)
@@ -46,6 +49,7 @@ func CreateTodo(todo *Todo) error {
 	return nil
 }
 
+// 根据id删除TODO
 func DeleteTodoById(id int) (Todo, error) {
 	todo := Todo{}
 	result := db.First(&todo, id)
@@ -65,20 +69,37 @@ func DeleteTodoById(id int) (Todo, error) {
 	return todo, nil
 }
 
+// 根据id更新TODO完成状态
+func DoneTodoById(id int, done bool) (Todo, error) {
+	todoInDB := Todo{}
+	result := db.First(&todoInDB, id)
+
+	if result.Error != nil {
+
+		return todoInDB, result.Error
+	}
+
+	db.Model(&todoInDB).Update("Done", done)
+
+	if result.Error != nil {
+
+		return todoInDB, result.Error
+	}
+
+	return todoInDB, nil
+}
+
+// 根据id更新TODO
 func UpdateTodoById(id int, todo *Todo) error {
 
-	todoInDB := Todo{}
-	result := db.First(&todo, id)
+	result := db.First(&Todo{}, id)
 
 	if result.Error != nil {
 
 		return result.Error
 	}
 
-	todoInDB.Content = todo.Content
-	todoInDB.Done = todo.Done
-
-	result = db.Save(&todo)
+	result = db.Model(todo).Updates(todo)
 
 	if result.Error != nil {
 

@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -38,14 +39,8 @@ func CreateTodo(c *gin.Context) {
 		log.Fatalln(err)
 	}
 
-	todos, err2 := model.GetTodos()
-
-	if err2 != nil {
-		log.Fatalln(err2)
-	}
-
 	c.HTML(http.StatusOK, "todo_content.html", gin.H{
-		"todos": todos,
+		"todos": []model.Todo{todo},
 	})
 }
 
@@ -59,4 +54,65 @@ func DeleteTodo(c *gin.Context) {
 	}
 
 	c.String(http.StatusOK, "")
+}
+
+func GetEditTodoById(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	todo, err := model.GetTodoById(id)
+
+	fmt.Println(todo)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	c.HTML(http.StatusOK, "todo_update_modal.html", gin.H{
+		"todo": todo,
+	})
+}
+
+func CancelEditTodo(c *gin.Context) {
+
+	c.String(http.StatusOK, "")
+}
+
+func UpdateTodo(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	todo, err := model.GetTodoById(id)
+	content := c.PostForm("content")
+	fmt.Printf("content: %v\n", content)
+	todo.Content = content
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	err = model.UpdateTodoById(id, &todo)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	c.HTML(http.StatusOK, "todo_content.html", gin.H{
+		"todos": []model.Todo{todo},
+	})
+}
+
+func DoneTodo(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	todo, err := model.GetTodoById(id)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	todInDB, err2 := model.DoneTodoById(id, !todo.Done)
+
+	if err2 != nil {
+		log.Fatalln(err2)
+	}
+
+	c.HTML(http.StatusOK, "todo_content.html", gin.H{
+		"todos": []model.Todo{todInDB},
+	})
 }

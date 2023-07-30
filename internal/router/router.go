@@ -12,17 +12,12 @@ func New() *gin.Engine {
 
 	r.GET("/", controller.Index)
 	r.GET("/get_todos", controller.GetTodos)
+	r.GET("/cancel_edit_todo", controller.CancelEditTodo)
+	r.GET("/edit_todo/:id", controller.GetEditTodoById)
 	r.POST("/create_todo", controller.CreateTodo)
 	r.DELETE("/delete_todo/:id", controller.DeleteTodo)
-
-	// g := r.Group("/todo")
-	// {
-	// 	g.GET("/:id", controller.GetTodoById)
-	// 	g.PUT("/:id", controller.UpdateTodoById)
-	// 	g.DELETE("/:id", controller.DeleteTodoById)
-	// 	g.GET("/", controller.GetTodo)
-	// 	g.POST("/", controller.CreateTodo)
-	// }
+	r.PUT("/done_todo/:id", controller.DoneTodo)
+	r.PUT("/update_todo/:id", controller.UpdateTodo)
 
 	return r
 }
