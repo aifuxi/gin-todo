@@ -8,5 +8,5 @@ import (
 func RunServer() {
 	r := router.New()
 
-	r.Run("localhost:9000")
+	r.Run(":9000")
 }
