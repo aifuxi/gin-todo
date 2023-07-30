@@ -1,0 +1,53 @@
+{{ range .todos }}
+<tr id="td_{{ .ID }}">
+  <td>
+    <label class="checkbox">
+      {{ if .Done }}
+      <input
+        type="checkbox"
+        checked
+        hx-put="/done_todo/{{ .ID }}"
+        hx-trigger="click"
+        hx-swap="outerHTML"
+        hx-target="#td_{{ .ID }}"
+      />
+      <span class="ml-2">已完成</span>
+      {{ else }}
+      <input
+        type="checkbox"
+        hx-put="/done_todo/{{ .ID }}"
+        hx-trigger="click"
+        hx-swap="outerHTML"
+        hx-target="#td_{{ .ID }}"
+      />
+      <span class="ml-2">未完成</span>
+      {{ end }}
+    </label>
+  </td>
+  <td>{{ .Content }}</td>
+  <td>{{.CreatedAt.Format "2006-01-02 15:04:05" }}</td>
+  <td>{{.UpdatedAt.Format "2006-01-02 15:04:05" }}</td>
+  <td>
+    <div class="buttons">
+      <button
+        class="button is-outlined"
+        hx-get="/edit_todo/{{ .ID }}"
+        hx-trigger="click"
+        hx-target="#td_{{ .ID }}"
+        hx-swap="beforeend"
+      >
+        编辑
+      </button>
+      <button
+        class="button is-danger is-outlined"
+        hx-delete="/delete_todo/{{ .ID }}"
+        hx-trigger="click"
+        hx-swap="outerHTML"
+        hx-target="#td_{{ .ID }}"
+      >
+        删除
+      </button>
+    </div>
+  </td>
+</tr>
+{{end}}

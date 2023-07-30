@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gin TODO</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"
+    />
+    <style>
+      .table td,
+      .table th {
+        vertical-align: middle;
+      }
+    </style>
+  </head>
+  <script
+    src="https://unpkg.com/htmx.org@1.9.4"
+    integrity="sha384-zUfuhFKKZCbHTY6aRR46gxiqszMk5tcHjsVFxnUo8VMus4kHGVdIYVbOYYNlKmHV"
+    crossorigin="anonymous"
+  ></script>
+
+  <body>
+    <div class="container">
+      <h1 class="title is-1">Gin TODO</h1>
+
+      <form id="create_todo_form">
+        <div class="field">
+          <label class="label">内容</label>
+          <div class="control">
+            <textarea
+              class="textarea"
+              name="content"
+              placeholder="给自己记个TODO吧~"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="field is-grouped">
+          <div class="control">
+            <button
+              class="button is-link"
+              hx-post="/create_todo"
+              hx-trigger="click"
+              hx-target="table>tbody"
+              hx-swap="beforeend"
+            >
+              提交
+            </button>
+          </div>
+          <div class="control">
+            <button class="button is-link is-light" type="reset">重置</button>
+          </div>
+        </div>
+      </form>
+
+      <table
+        class="table is-fullwidth is-bordered is-striped is-hoverable mt-4"
+        hx-trigger="load"
+        hx-get="/get_todos"
+        hx-target="table>tbody"
+      >
+        <thead>
+          <tr>
+            <th>状态</th>
+            <th>内容</th>
+            <th>创建时间</th>
+            <th>更新时间</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <div id="modal-wrapper"></div>
+    </div>
+  </body>
+
+  <script>
+    document.body.addEventListener("htmx:afterSwap", function (e) {
+      const form = document.querySelector("#create_todo_form");
+      form && form.reset();
+    });
+  </script>
+</html>

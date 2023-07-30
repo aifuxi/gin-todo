@@ -1,1 +1,10 @@
 tmp
+
+# db
+*.db
+
+# air config
+.air.toml
+
+# build后的文件
+*.exe

@@ -1,0 +1,45 @@
+<div class="modal" style="display: block">
+  <div class="modal-background"></div>
+  <form>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">编辑TODO</p>
+        <button class="delete" aria-label="close"></button>
+      </header>
+      <section class="modal-card-body">
+        <div class="field">
+          <label class="label">内容</label>
+          <div class="control">
+            <textarea
+              class="textarea"
+              name="content"
+              placeholder="给自己记个TODO吧~"
+            >
+{{ .todo.Content }}</textarea
+            >
+          </div>
+        </div>
+      </section>
+      <footer class="modal-card-foot">
+        <button
+          class="button is-success"
+          hx-put="/update_todo/{{ .todo.ID }}"
+          hx-trigger="click"
+          hx-swap="outerHTML"
+          hx-target="#td_{{ .todo.ID }}"
+        >
+          保存
+        </button>
+        <button
+          class="button"
+          hx-get="/cancel_edit_todo"
+          hx-trigger="click"
+          hx-target=".modal"
+          hx-swap="outerHTML"
+        >
+          取消
+        </button>
+      </footer>
+    </div>
+  </form>
+</div>
