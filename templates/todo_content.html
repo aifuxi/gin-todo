@@ -6,7 +6,7 @@
       <input
         type="checkbox"
         checked
-        hx-put="/done_todo/{{ .ID }}"
+        hx-put="done_todo/{{ .ID }}"
         hx-trigger="click"
         hx-swap="outerHTML"
         hx-target="#td_{{ .ID }}"
@@ -15,7 +15,7 @@
       {{ else }}
       <input
         type="checkbox"
-        hx-put="/done_todo/{{ .ID }}"
+        hx-put="done_todo/{{ .ID }}"
         hx-trigger="click"
         hx-swap="outerHTML"
         hx-target="#td_{{ .ID }}"
@@ -31,7 +31,7 @@
     <div class="buttons">
       <button
         class="button is-outlined"
-        hx-get="/edit_todo/{{ .ID }}"
+        hx-get="edit_todo/{{ .ID }}"
         hx-trigger="click"
         hx-target="#td_{{ .ID }}"
         hx-swap="beforeend"
@@ -40,7 +40,7 @@
       </button>
       <button
         class="button is-danger is-outlined"
-        hx-delete="/delete_todo/{{ .ID }}"
+        hx-delete="delete_todo/{{ .ID }}"
         hx-trigger="click"
         hx-swap="outerHTML"
         hx-target="#td_{{ .ID }}"

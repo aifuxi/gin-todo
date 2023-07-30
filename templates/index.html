@@ -41,7 +41,7 @@
           <div class="control">
             <button
               class="button is-link"
-              hx-post="/create_todo"
+              hx-post="create_todo"
               hx-trigger="click"
               hx-target="table>tbody"
               hx-swap="beforeend"
@@ -58,7 +58,7 @@
       <table
         class="table is-fullwidth is-bordered is-striped is-hoverable mt-4"
         hx-trigger="load"
-        hx-get="/get_todos"
+        hx-get="get_todos"
         hx-target="table>tbody"
       >
         <thead>

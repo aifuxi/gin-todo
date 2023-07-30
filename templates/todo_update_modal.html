@@ -23,7 +23,7 @@
       <footer class="modal-card-foot">
         <button
           class="button is-success"
-          hx-put="/update_todo/{{ .todo.ID }}"
+          hx-put="update_todo/{{ .todo.ID }}"
           hx-trigger="click"
           hx-swap="outerHTML"
           hx-target="#td_{{ .todo.ID }}"
@@ -32,7 +32,7 @@
         </button>
         <button
           class="button"
-          hx-get="/cancel_edit_todo"
+          hx-get="cancel_edit_todo"
           hx-trigger="click"
           hx-target=".modal"
           hx-swap="outerHTML"
